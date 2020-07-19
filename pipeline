@@ -1,0 +1,25 @@
+pipeline {
+   agent any
+
+   stages {
+      stage('Build') {
+         steps {
+           	// Get some code from a GitHub repository
+            git 'https://github.com/kubernetes-client/java.git'
+            // Run Maven on a Unix agent.
+            sh "mvn -Dmaven.test.failure.ignore=true clean package"
+            sh "mvn clean package"
+         }
+
+         post {
+            success {
+            	// run the tests
+               	junit '**/target/surefire-reports/TEST-*.xml'
+               	archiveArtifacts 'util/target/*.jar'
+               	sh "md5sum /var/lib/jenkins/workspace/homework2/target/client-java-7.0.0-SNAPSHOT.jar  >> /tmp/buildHash"
+            }
+         }
+      }
+   }
+}
+
